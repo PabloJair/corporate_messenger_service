@@ -1,0 +1,181 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\CodeResponse;
+use App\Models\ModelPermission;
+use App\Models\ResponseModel;
+use App\ViewUserInformation;
+
+class UserController extends Controller
+{
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @param Int $idUSer
+     * @param Int $idCompany
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function UserByIdCompany(Int $idUSer,Int $idCompany)
+    {
+
+        $items = ViewUserInformation::where('id_company',$idCompany)->where('id_user',$idUSer)->get();
+        return response()->json(new ResponseModel(CodeResponse::ERROR,"",$this->FormatUser($items)), 200);
+
+    }
+
+    public function GetUsersByIdCompany(Int $idCompany)
+    {
+
+        $items = ViewUserInformation::select(
+            'id_user',
+            'id_company',
+            'email',
+            'no_employee',
+            'name',
+            'paternal_surname',
+            'maternal_surname',
+            'photo_path',
+            'name_area',
+            'icon_area',
+            'name_company',
+            'logotype_company',
+            'id_rol',
+            'name_rol',
+            'id_status_user'
+        )
+            ->where('id_company',$idCompany)
+            ->groupBy([   'id_user',
+                'id_company',
+                'email',
+                'no_employee',
+                'name',
+                'paternal_surname',
+                'maternal_surname',
+                'photo_path',
+                'name_area',
+                'icon_area',
+                'name_company',
+                'logotype_company',
+                'id_rol',
+                'name_rol',
+                'id_status_user'])
+            ->get();
+        return response()->json(new ResponseModel(CodeResponse::SUCCESS,"",$this->FormatUsers($items)), 200);
+
+    }
+
+
+
+    public function getAllUser()
+    {
+
+        $items = ViewUserInformation::select(
+            'id_user',
+            'name',
+            'paternal_surname',
+            'maternal_surname',
+            'photo_path'
+        )
+            ->groupBy('id_user')
+            ->get();
+        return response()->json(new ResponseModel(CodeResponse::SUCCESS,"",$this->FormatUsers($items)), 200);
+
+    }
+    private function FormatUser(object $items){
+
+
+        if(count($items)<=0){
+            return array();
+        }
+
+        $filterItem = new ViewUserInformation();
+
+        $filterItem->id_user = $items->get(0)->id_user;
+        $filterItem->no_employee = $items->get(0)->no_employee;
+        $filterItem->name = $items->get(0)->name;
+        $filterItem->paternal_surname = $items->get(0)->paternal_surname;
+        $filterItem->maternal_surname = $items->get(0)->maternal_surname;
+        $filterItem->email = $items->get(0)->email;
+        $filterItem->photo_path = $items->get(0)->photo_path;
+
+        $filterItem->name_area = $items->get(0)->name_area;
+        $filterItem->icon_area = $items->get(0)->icon_area;
+
+        $filterItem->name_company = $items->get(0)->name_company;
+        $filterItem->logotype_company = $items->get(0)->logotype_company;
+        $filterItem->id_company = $items->get(0)->id_company;
+
+
+
+        $filterItem->id_rol = $items->get(0)->id_rol;
+        $filterItem->name_rol = $items->get(0)->name_rol;
+        $filterItem->name_status_user = $items->get(0)->id_status_user;
+
+
+
+        $filterModule=array();
+
+        foreach ($items as $item){
+
+            $modelPermission = new ModelPermission();
+            $modelPermission->can_create =$item->can_create;
+            $modelPermission->can_delete =$item->can_delete;
+            $modelPermission->can_update =$item->can_update;
+            $modelPermission->can_select =$item->can_select;
+
+            $modelPermission->name_module =$item->name_module;
+            $modelPermission->id_module =$item->id_module;
+            $modelPermission->icon_module =$item->icon_module;
+
+            array_push($filterModule,$modelPermission);
+
+
+        }
+
+        $filterItem->modules =$filterModule;
+        return $filterItem;
+
+    }
+
+
+    private function FormatUsers(object $items){
+
+
+        if(count($items)<=0){
+            return array();
+        }
+
+        $filterItems = array();
+        foreach ($items as $item) {
+            $filterItem = new ViewUserInformation();
+
+            $filterItem->id_user = $item->id_user;
+            $filterItem->no_employee = $item->no_employee;
+            $filterItem->name = $item->name;
+            $filterItem->paternal_surname = $item->paternal_surname;
+            $filterItem->maternal_surname = $item->maternal_surname;
+            $filterItem->email = $item->email;
+            $filterItem->photo_path = $item->photo_path;
+
+            $filterItem->name_area = $item->name_area;
+            $filterItem->icon_area = $item->icon_area;
+
+            $filterItem->name_company = $item->name_company;
+            $filterItem->logotype_company = $item->logotype_company;
+            $filterItem->id_company = $item->id_company;
+
+
+            $filterItem->id_rol = $item->id_rol;
+            $filterItem->name_rol = $item->name_rol;
+            $filterItem->name_status_user = $item->id_status_user;
+
+            array_push($filterItems,$filterItem);
+
+        }
+
+        return $filterItems;
+
+    }
+
+}

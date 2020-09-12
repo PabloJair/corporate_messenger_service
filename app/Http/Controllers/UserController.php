@@ -9,10 +9,10 @@ use App\Models\ResponseModel;
 use App\User;
 use App\ViewUserInformation;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Intervention\Image\ImageManagerStatic as Image;
 use Illuminate\Support\Facades\Storage as Storage;
-use Kreait\Firebase\Exception\MessagingException;
 use NotificationChannels\Fcm\Exceptions\CouldNotSendNotification;
 
 class UserController extends Controller
@@ -92,6 +92,7 @@ class UserController extends Controller
     public function GetUsersByIdCompany(Int $idCompany)
     {
 
+
         $items = ViewUserInformation::select(
             'id_user',
             'id_company',
@@ -107,7 +108,7 @@ class UserController extends Controller
             'logotype_company',
             'id_rol',
             'name_rol',
-            'id_status_user'
+            'status_user'
         )
             ->where('id_company',$idCompany)
             ->groupBy([   'id_user',
@@ -124,8 +125,10 @@ class UserController extends Controller
                 'logotype_company',
                 'id_rol',
                 'name_rol',
-                'id_status_user'])
+                'status_user'])
             ->get();
+
+
         return response()->json(new ResponseModel(CodeResponse::SUCCESS,"",$this->FormatUsers($items)), 200);
 
     }
@@ -162,7 +165,7 @@ class UserController extends Controller
         $filterItem->paternal_surname = $items->get(0)->paternal_surname;
         $filterItem->maternal_surname = $items->get(0)->maternal_surname;
         $filterItem->email = $items->get(0)->email;
-        $filterItem->photo_path =  $items->get(0)->photo_path;
+        $filterItem->photo_path =  assert($items->get(0)->photo_path);
 
         $filterItem->name_area = $items->get(0)->name_area;
         $filterItem->icon_area = $items->get(0)->icon_area;
@@ -175,7 +178,7 @@ class UserController extends Controller
 
         $filterItem->id_rol = $items->get(0)->id_rol;
         $filterItem->name_rol = $items->get(0)->name_rol;
-        $filterItem->name_status_user = $items->get(0)->id_status_user;
+        $filterItem->name_status_user = $items->get(0)->status_user;
 
 
 
@@ -244,7 +247,7 @@ class UserController extends Controller
 
             $filterItem->id_rol = $item->id_rol;
             $filterItem->name_rol = $item->name_rol;
-            $filterItem->name_status_user = $item->id_status_user;
+            $filterItem->name_status_user = $item->status_user;
 
             array_push($filterItems,$filterItem);
 

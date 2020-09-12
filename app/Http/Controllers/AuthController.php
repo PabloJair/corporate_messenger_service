@@ -11,6 +11,7 @@ use App\User;
 use App\UserIformationCompanys;
 use App\ViewInfoUserCompany;
 use App\ViewUserInformation;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -87,7 +88,7 @@ class AuthController extends Controller
 
         $UserCompany= new UserIformationCompanys();
         $UserCompany->id_user = $user->id_user;
-        $UserCompany->id_company = $company->cod_company;
+        $UserCompany->id_company = $company->id_company;
         $UserCompany->id_area = 0;
         $UserCompany->id_rol =0;
 
@@ -140,7 +141,9 @@ class AuthController extends Controller
 
         if($jwt_token){
 
+            //DB::enableQueryLog(); // Enable query log
             $infoUser=ViewInfoUserCompany::where('email',$request->only('email'))->first();
+            //dd(DB::getQueryLog()); // Show results of log
             $permission = ViewUserInformation::where('email',$request->only('email'))->get();
 
             return response()->json(
@@ -172,7 +175,7 @@ class AuthController extends Controller
         }
     }
 
-    private function FormatUser(object $items,string $token,ViewInfoUserCompany $infoUserCompany){
+    private function FormatUser(object $items,string $token,object $infoUserCompany){
 
 
 
@@ -185,20 +188,21 @@ class AuthController extends Controller
         $filterItem->paternal_surname = $infoUserCompany->paternal_surname;
         $filterItem->maternal_surname = $infoUserCompany->maternal_surname;
         $filterItem->email = $infoUserCompany->email;
-        $filterItem->photo_path = $infoUserCompany->photo_path;
+        $imagePath = ($infoUserCompany->photo_path?:"storage/default_user.png");
+        $filterItem->photo_path = assert($imagePath);
 
-        $filterItem->name_area = $infoUserCompany->name_area;
-        $filterItem->icon_area = $infoUserCompany->icon_area;
+        $filterItem->name_area = $infoUserCompany->name_area?:"";
+        $filterItem->icon_area = $infoUserCompany->icon_area?:0;
 
-        $filterItem->name_company = $infoUserCompany->name_company;
-        $filterItem->logotype_company = $infoUserCompany->logotype_company;
-        $filterItem->id_company = $infoUserCompany->id_company;
+        $filterItem->name_company = $infoUserCompany->name_company?:"";
+        $filterItem->logotype_company = $infoUserCompany->logotype_company?:"";
+        $filterItem->id_company = $infoUserCompany->id_company?:0;
 
 
 
-        $filterItem->id_rol = $infoUserCompany->id_rol;
-        $filterItem->name_rol = $infoUserCompany->name_rol;
-        $filterItem->name_status_user = $infoUserCompany->id_status_user;
+        $filterItem->id_rol = $infoUserCompany->id_rol?:0;
+        $filterItem->name_rol = $infoUserCompany->name_rol?:"";
+        $filterItem->name_status_user = $infoUserCompany->id_status_user?:0;
 
 
 

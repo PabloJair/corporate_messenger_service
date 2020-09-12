@@ -2,39 +2,114 @@
 
 namespace App\Http\Controllers;
 
+use App\Company;
 use App\Models\CodeResponse;
 use App\Models\ModelPermission;
 use App\Models\ResponseModel;
+use App\Notifications\SignupActivate;
 use App\User;
 use App\UserIformationCompanys;
+use App\ViewInfoUserCompany;
 use App\ViewUserInformation;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Http\Controllers\Controller;
-use Illuminate\Contracts\Auth\Guard;
-use Tymon\JWTAuth\JWTAuth;
+use Tymon\JWTAuth\Exceptions\JWTException;
+use Illuminate\Support\Str;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 
 class AuthController extends Controller
 {
-    public  $loginAfterSignUp = true;
+    public function signup(Request $request)
+    {
 
-    public  function  register(Request  $request) {
-        $user = new  User();
-        $user->no_employee      = $request->no_employee;
-        $user->name             = $request->name;
-        $user->paternal_surname = $request->paternal_surname;
-        $user->maternal_surname = $request->maternal_surname;
-        $user->email            = $request->email;
-        $user->password         = bcrypt($request->password);
-        $user->photo_path       = $request->photo_path;
-        $is_saved = $user->save();
 
-        return  response()->json([
-            'status' => 'ok',
-            'data' => $is_saved
-        ], 200);
+        $user = new User([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => bcrypt($request->password),
+            'no_employee'     => $request->no_employee,
+            'paternal_surname' => $request->paternal_surname,
+            'maternal_surname' => $request->maternal_surname,
+            'activation_token' => Str::uuid()->toString()
+
+        ]);
+        $user->deleted_at =null;
+
+
+        $company  = Company::where('cod_company', $request->cod_company)->first();
+        if($company==null){
+            return response()->json(new ResponseModel(CodeResponse::ERROR,"Valida tu informacion",null,"cod_company"), 200);
+
+        }
+
+        $validate=$user->validate($request->only(['name','email','password','no_employee','paternal_surname','maternal_surname']));
+
+
+
+
+
+        if($validate->fails()){
+            return response()->json(new ResponseModel(CodeResponse::ERROR,"Valida tu informacion",$user,$validate->messages()), 200);
+        }
+
+
+
+        if($user->save()) {
+            $user->cod_company = $request->cod_company;
+
+            $user->notify(new SignupActivate($user));
+            return response()->json(
+                new ResponseModel(CodeResponse::SUCCESS, null, "Registro exitoso, se envió un correo a " . $user->email . " para que validez tu cuenta"), 200);
+        }else
+            return response()->json(
+                new ResponseModel(CodeResponse::ERROR, null, "Registro no completado, valida tu informacion"), 200);
+
+    }
+
+    public function signupActivate($token,$codCompany)
+    {
+
+        $user = User::where('activation_token', $token)->first();
+
+        if ($user== null) {
+           return response()->json( new ResponseModel(CodeResponse::ERROR,null,"Tu token ha expirado o es invalido", 200));
+
+        }
+
+        $company  = Company::where('cod_company', $codCompany)->first();
+        if($company==null){
+            return response()->json(new ResponseModel(CodeResponse::ERROR,"Valida tu informacion",null,"cod_company"), 200);
+
+        }
+
+
+        $UserCompany= new UserIformationCompanys();
+        $UserCompany->id_user = $user->id_user;
+        $UserCompany->id_company = $company->cod_company;
+        $UserCompany->id_area = 0;
+        $UserCompany->id_rol =0;
+
+        $user->active = true;
+        $user->activation_token = '';
+        $user->save();
+        $UserCompany->save();
+        return "Registro completado";
+    }
+
+    public  function  recoveryPassword(Request $request) {
+        $user = User::select()->where("email",$request->email)->first();
+
+
+
+        if($user!=null){
+            $user->sendPasswordResetNotification(Str::uuid()->toString());
+        }
+
+        return response()->json(
+            new ResponseModel(CodeResponse::ERROR,null,"Registro exitoso"), 200);
+
     }
 
     public  function  login(Request  $request) {
@@ -43,31 +118,33 @@ class AuthController extends Controller
        $validator = Validator::make($credentials,[
 
            'email' =>'required|email',
-           'password'=>'required'
+           'password'=>'required',
+           'remember_me' => 'boolean'
+
        ]);
 
-        $username =  $request->input('email');
-        $password =  $request->input('password');
-        //$token = JWTAuth::attempt($credentials);
 
         if($validator->fails()) {
             return response()->json(
                 new ResponseModel(CodeResponse::ERROR,null,"Las contraseñas son invalidas"), 200);
         }
 
+        $credentials = $request->only('email', 'password');
+        if (!$jwt_token = JWTAuth::attempt($credentials)) {
+            return  response()->json([
+                'status' => 'invalid_credentials',
+                'message' => 'Correo o contraseña no válidos.',
+            ], 401);
+        }
 
-       $token = $this->guard()->attempt(
 
-           array('email'=> $username,'password'=>$password)
-       );
+        if($jwt_token){
 
-        if($token){
-            $informationUser = ViewUserInformation::where('email',$username)->get();
-
-
+            $infoUser=ViewInfoUserCompany::where('email',$request->only('email'))->first();
+            $permission = ViewUserInformation::where('email',$request->only('email'))->get();
 
             return response()->json(
-                new ResponseModel(CodeResponse::SUCCESS,"Login correcto",$this->FormatUser($informationUser,$token)), 200);
+                new ResponseModel(CodeResponse::SUCCESS,"Login correcto",$this->FormatUser($permission,$jwt_token,$infoUser)), 200);
         }
         else{
 
@@ -95,36 +172,33 @@ class AuthController extends Controller
         }
     }
 
-    private function FormatUser(object $items,string $token){
+    private function FormatUser(object $items,string $token,ViewInfoUserCompany $infoUserCompany){
 
 
-        if(count($items)<=0){
-            return array();
-        }
 
         $filterItem = new ViewUserInformation();
         $filterItem->token =$token;
 
-        $filterItem->id_user = $items->get(0)->id_user;
-        $filterItem->no_employee = $items->get(0)->no_employee;
-        $filterItem->name = $items->get(0)->name;
-        $filterItem->paternal_surname = $items->get(0)->paternal_surname;
-        $filterItem->maternal_surname = $items->get(0)->maternal_surname;
-        $filterItem->email = $items->get(0)->email;
-        $filterItem->photo_path = $items->get(0)->photo_path;
+        $filterItem->id_user = $infoUserCompany->id_user;
+        $filterItem->no_employee = $infoUserCompany->no_employee;
+        $filterItem->name = $infoUserCompany->name;
+        $filterItem->paternal_surname = $infoUserCompany->paternal_surname;
+        $filterItem->maternal_surname = $infoUserCompany->maternal_surname;
+        $filterItem->email = $infoUserCompany->email;
+        $filterItem->photo_path = $infoUserCompany->photo_path;
 
-        $filterItem->name_area = $items->get(0)->name_area;
-        $filterItem->icon_area = $items->get(0)->icon_area;
+        $filterItem->name_area = $infoUserCompany->name_area;
+        $filterItem->icon_area = $infoUserCompany->icon_area;
 
-        $filterItem->name_company = $items->get(0)->name_company;
-        $filterItem->logotype_company = $items->get(0)->logotype_company;
-        $filterItem->id_company = $items->get(0)->id_company;
+        $filterItem->name_company = $infoUserCompany->name_company;
+        $filterItem->logotype_company = $infoUserCompany->logotype_company;
+        $filterItem->id_company = $infoUserCompany->id_company;
 
 
 
-        $filterItem->id_rol = $items->get(0)->id_rol;
-        $filterItem->name_rol = $items->get(0)->name_rol;
-        $filterItem->name_status_user = $items->get(0)->id_status_user;
+        $filterItem->id_rol = $infoUserCompany->id_rol;
+        $filterItem->name_rol = $infoUserCompany->name_rol;
+        $filterItem->name_status_user = $infoUserCompany->id_status_user;
 
 
 
@@ -151,7 +225,6 @@ class AuthController extends Controller
         return $filterItem;
 
     }
-
 
     public function guard()
     {

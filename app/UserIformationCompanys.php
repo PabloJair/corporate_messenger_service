@@ -16,7 +16,7 @@ class UserIformationCompanys extends Model implements IValidator
     public $incrementing    = true;
     protected $keyType      = 'int';
 
-    protected $fillable = ['id_user','id_company','id_area','id_rol','status_user'];
+    protected $fillable = ['id_user','id_company','id_area','id_rol'];
 
     public function validateDeleted(array $data)
     {

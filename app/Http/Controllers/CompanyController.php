@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Company;
 use App\Models\CodeResponse;
 use App\Models\ResponseModel;
+use App\User;
 use Illuminate\Http\Request;
 
 class CompanyController extends Controller

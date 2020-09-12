@@ -2,10 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\AccountActivated;
 use App\Models\CodeResponse;
 use App\Models\ModelPermission;
 use App\Models\ResponseModel;
+use App\User;
 use App\ViewUserInformation;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+use Intervention\Image\ImageManagerStatic as Image;
+use Illuminate\Support\Facades\Storage as Storage;
+use Kreait\Firebase\Exception\MessagingException;
+use NotificationChannels\Fcm\Exceptions\CouldNotSendNotification;
 
 class UserController extends Controller
 {
@@ -23,6 +31,63 @@ class UserController extends Controller
         return response()->json(new ResponseModel(CodeResponse::ERROR,"",$this->FormatUser($items)), 200);
 
     }
+
+    public function updatePhoto(Request $request,int $idUser)
+    {
+
+        $validate =Validator::make($request->all(), [
+            'image' => 'image|mimes:jpeg,png,jpg|max:2048',
+        ]);
+
+
+        if(!$validate){
+            return response()->json(new ResponseModel(CodeResponse::ERROR,"","Formato no valido"), 200);
+
+        }
+        $user=User::find($idUser);
+
+        Storage::delete('public/'.$user->photo_path);
+
+        $originalPath = storage_path('app/public/');
+        $originalImage= $request->file('image');
+
+
+        $nameImage=time().$originalImage->getClientOriginalName();
+        $thumbnailImage = Image::make($originalImage);
+        $thumbnailImage->resize(700,700);
+        $thumbnailImage->save($originalPath.$nameImage);
+        $user->photo_path =$nameImage;
+        $user->save();
+        return response()->json(new ResponseModel(CodeResponse::SUCCESS,"", $user,null),200);
+
+    }
+
+
+    public function updateProfile(Request $request,int $idUser)
+    {
+        $data =new User($request->all());
+
+
+        $validate=$data->validate($request->only( 'no_employee',
+            'name',
+            'paternal_surname',
+            'maternal_surname',
+            'phone_number'));
+
+        if($validate->fails()){
+            return response()->json(new ResponseModel(CodeResponse::ERROR,"Campos invalidos",$data,$validate->messages()), 200);
+        }
+        $user=User::find($idUser);
+        $user->name = $data->name;
+        $user->paternal_surname = $data->paternal_surname;
+        $user->maternal_surname = $data->maternal_surname;
+        $user->phone_number = $data->phone_number;
+        $user->save();
+
+        return response()->json(new ResponseModel(CodeResponse::SUCCESS,"Actualización correcta", $user,null),200);
+
+    }
+
 
     public function GetUsersByIdCompany(Int $idCompany)
     {
@@ -97,7 +162,7 @@ class UserController extends Controller
         $filterItem->paternal_surname = $items->get(0)->paternal_surname;
         $filterItem->maternal_surname = $items->get(0)->maternal_surname;
         $filterItem->email = $items->get(0)->email;
-        $filterItem->photo_path = $items->get(0)->photo_path;
+        $filterItem->photo_path =  $items->get(0)->photo_path;
 
         $filterItem->name_area = $items->get(0)->name_area;
         $filterItem->icon_area = $items->get(0)->icon_area;
@@ -135,6 +200,17 @@ class UserController extends Controller
 
         $filterItem->modules =$filterModule;
         return $filterItem;
+
+    }
+    public function sendPushNotification(Int $idUser){
+        try {
+            $user=User::find($idUser);
+            $user->notify(new AccountActivated());
+        }catch (CouldNotSendNotification $exception){
+            dd($exception);
+        }
+
+
 
     }
 

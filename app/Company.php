@@ -16,7 +16,7 @@ class Company extends Model implements IValidator
     protected $keyType      = 'int';
 
 
-    protected $fillable = ['name_company','description_company','logotype_company'];
+    protected $fillable = ['name_company','description_company','logotype_company','cod_company'];
 
     public function validateDeleted(array $data)
     {

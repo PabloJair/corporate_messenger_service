@@ -8,7 +8,8 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:api')->get('/user', function (Request $request) {return $request->user();});
 
 Route::post('/login', 'AuthController@login');
-Route::post('/register', 'AuthController@register');
+Route::post('/auth/signup', 'AuthController@signup');
+Route::get('/auth/signup/activate/{token}/{codCompany}', 'AuthController@signupActivate');
 
 //CRUD de AREA OK
 
@@ -41,9 +42,14 @@ Route::post('/userStatus/add', 'UserStatusController@store');
 Route::patch('/userStatus/{id}', 'UserStatusController@update');
 Route::delete('/serStatus/{id}', 'UserStatusController@destroy');
 Route::get('/userStatus/all', 'UserStatusController@show');
+
 //User
 
 Route::get('/user/{idUser}/{idCompany}', 'UserController@UserByIdCompany');
+Route::post('/user/updatePhoto/{idUser}', 'UserController@updatePhoto');
+Route::patch('/user/updateProfile/{idUser}', 'UserController@updateProfile');
+Route::post('/user/sendPushNotification/{idUser}', 'UserController@sendPushNotification');
+Route::post('/user/recoveryPassword/', 'AuthController@recoveryPassword');
 
 Route::get('/users/forCompany/{idCompany}', 'UserController@GetUsersByIdCompany');
 Route::get('/user/all', 'UserController@getAllUser');
@@ -56,12 +62,21 @@ Route::get('/assigment/userBetweenDate/{idUser}/{startDate}', 'AssigmentOfActivi
 
 
 //MESSAGE
-
 Route::get('/message/by/{idUser}', 'MessageController@getAllMessageByUser');
 Route::post('/message/send', 'MessageController@sendMessage');
 Route::get('/message/room/{idRoom}/{idUser}/{date}', 'MessageController@getMessageFromRoom');
 Route::get('/message/fromLastMessage/{idRoom}/{idUser}/{date}/{lastMessage}', 'MessageController@getLastMessageFrom');
 
+
+Route::group([
+    'middleware' => 'api',
+    'prefix' => 'password'
+], function () {
+    Route::post('create', 'PasswordResetController@create');
+    Route::get('find/{token}', 'PasswordResetController@find');
+    Route::post('reset', 'PasswordResetController@reset');
+
+});
 Route::group(['middleware' => 'auth.jwt'], function () {
     Route::post('/logout', 'AuthController@logout');
 

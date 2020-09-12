@@ -188,8 +188,8 @@ class AuthController extends Controller
         $filterItem->paternal_surname = $infoUserCompany->paternal_surname;
         $filterItem->maternal_surname = $infoUserCompany->maternal_surname;
         $filterItem->email = $infoUserCompany->email;
-        $imagePath = ($infoUserCompany->photo_path?:"storage/default_user.png");
-        $filterItem->photo_path = assert($imagePath);
+        $imagePath = asset(($infoUserCompany->photo_path?:"storage/default_user.png"));
+        $filterItem->photo_path = $imagePath;
 
         $filterItem->name_area = $infoUserCompany->name_area?:"";
         $filterItem->icon_area = $infoUserCompany->icon_area?:0;

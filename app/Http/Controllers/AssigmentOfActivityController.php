@@ -48,6 +48,24 @@ class AssigmentOfActivityController extends Controller
 
     }
 
+    public function getCurrentWeekend(int $idUSer)
+    {
+
+
+
+        $results = DB::select( DB::raw("select * from assigment_of_activities
+                                where start_date between date_sub(now(),INTERVAL 1 WEEK) and now() and id_user = ".$idUSer), array(
+        ));
+
+
+
+        return response()->json(
+            new ResponseModel(CodeResponse::SUCCESS,"Success",$results), 200);
+
+
+    }
+
+
     /**
      * Store a newly created resource in storage.
      *

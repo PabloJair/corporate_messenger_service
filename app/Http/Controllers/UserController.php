@@ -41,7 +41,7 @@ class UserController extends Controller
 
 
         if(!$validate){
-            return response()->json(new ResponseModel(CodeResponse::ERROR,"","Formato no valido"), 200);
+            return response()->json(new ResponseModel(CodeResponse::ERROR,"Formato no valido",null), 200);
 
         }
         $user=User::find($idUser);

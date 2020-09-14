@@ -59,6 +59,7 @@ Route::patch('/assigment/update/{id}', 'AssigmentOfActivityController@update');
 Route::delete('/assigment/delete/{id}', 'AssigmentOfActivityController@destroy');
 Route::get('/assigment/all', 'AssigmentOfActivityController@all');
 Route::get('/assigment/userBetweenDate/{idUser}/{startDate}', 'AssigmentOfActivityController@userBetweenDate');
+Route::get('/assigment/for/weekend/{idUser}', 'AssigmentOfActivityController@getCurrentWeekend');
 
 
 //MESSAGE

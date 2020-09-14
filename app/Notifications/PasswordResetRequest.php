@@ -38,7 +38,7 @@ class PasswordResetRequest extends Notification implements ShouldQueue
         $url = url('/api/password/find/'.$this->token);
         return (new MailMessage)
             ->line('Está recibiendo este correo electrónico porque recibimos una solicitud de restablecimiento de contraseña para su cuenta.')
-            ->action('Recuperar contraseña', url($url))
+            ->greeting("Tu codigo es:".$this->token)
             ->line('Si no solicitó un restablecimiento de contraseña, no se requiere ninguna otra acción.');
     }
     /**

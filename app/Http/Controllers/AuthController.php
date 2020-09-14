@@ -30,7 +30,6 @@ class AuthController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => bcrypt($request->password),
-            'no_employee'     => $request->no_employee,
             'paternal_surname' => $request->paternal_surname,
             'maternal_surname' => $request->maternal_surname,
             'activation_token' => Str::uuid()->toString()
@@ -52,7 +51,7 @@ class AuthController extends Controller
 
 
         if($validate->fails()){
-            return response()->json(new ResponseModel(CodeResponse::ERROR,"Valida tu informacion",$user,$validate->messages()), 200);
+            return response()->json(new ResponseModel(CodeResponse::ERROR,"Revisa si tus datos no se han agregado con anterioridad",null,"Valida tu correo"), 200);
         }
 
 
@@ -62,10 +61,10 @@ class AuthController extends Controller
 
             $user->notify(new SignupActivate($user));
             return response()->json(
-                new ResponseModel(CodeResponse::SUCCESS, null, "Registro exitoso, se envió un correo a " . $user->email . " para que validez tu cuenta"), 200);
+                new ResponseModel(CodeResponse::SUCCESS, "Registro exitoso, se envió un correo a " . $user->email . " para que validez tu cuenta",null ), 200);
         }else
             return response()->json(
-                new ResponseModel(CodeResponse::ERROR, null, "Registro no completado, valida tu informacion"), 200);
+                new ResponseModel(CodeResponse::ERROR, "Registro no completado, valida tu informacion",null ), 200);
 
     }
 

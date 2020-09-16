@@ -48,20 +48,34 @@ class AssigmentOfActivityController extends Controller
 
     }
 
+
+
+
+    public function changeStatusAssigment(int $idAssigment,string $status)
+    {
+
+        $assigment = AssigmentOfActivity::find($idAssigment);
+        $assigment->status_activity = $status;
+
+       if( $assigment->save()) {
+           return response()->json(
+               new ResponseModel(CodeResponse::SUCCESS, "Actividad actualizada", "OK"), 200);
+       }
+       else {
+           return response()->json(
+               new ResponseModel(CodeResponse::ERROR, "Actividad  no actualizada", "OK"), 200);
+       }
+
+
+    }
     public function getCurrentWeekend(int $idUSer)
     {
 
-
-
-        $results = DB::select( DB::raw("select * from assigment_of_activities
-                                where start_date between date_sub(now(),INTERVAL 1 WEEK) and now() and id_user = ".$idUSer), array(
+        $results = DB::select( DB::raw("select *from assigment_of_activities where   week(start_date) = week(now()) and id_user =".$idUSer), array(
         ));
-
-
 
         return response()->json(
             new ResponseModel(CodeResponse::SUCCESS,"Success",$results), 200);
-
 
     }
 

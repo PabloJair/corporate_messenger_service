@@ -75,7 +75,7 @@ class UserController extends Controller
             'phone_number'));
 
         if($validate->fails()){
-            return response()->json(new ResponseModel(CodeResponse::ERROR,"Campos invalidos",$data,$validate->messages()), 200);
+            return response()->json(new ResponseModel(CodeResponse::ERROR,"Campos invalidos",$data,"Error en actualizar tu perfil"), 200);
         }
         $user=User::find($idUser);
         $user->name = $data->name;

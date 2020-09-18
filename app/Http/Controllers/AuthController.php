@@ -101,7 +101,8 @@ class AuthController extends Controller
         $UserCompany->id_area = 0;
         $UserCompany->id_rol =0;
 
-        DB::table('user')->where('id_user', $user->id_user)->update(['active' => true,'activation_token'=>'']);
+
+        DB::table('user')->where('id_user', $user->id_user)->update(['active' => true,'activation_token'=>'','deleted_at'=>'']);
         $UserCompany->save();
         return "Registro completado";
     }

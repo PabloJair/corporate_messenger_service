@@ -33,7 +33,7 @@ class UserController extends Controller
     }
 
 
-    public function updateToken(Request $request,int $idUser)
+    public function updateFirebaseToken(Request $request,int $idUser)
     {
 
         $validate =Validator::make($request->all(), [
@@ -48,9 +48,9 @@ class UserController extends Controller
         $user=User::find($idUser);
 
 
-        $user->device_id =$request->get('token');
+        $user->device_id =$request->get('firebaseToken');
         $user->save();
-        return response()->json(new ResponseModel(CodeResponse::SUCCESS,"", $user,null),200);
+        return response()->json(new ResponseModel(CodeResponse::SUCCESS,"Token actualizado", null,null),200);
 
     }
 

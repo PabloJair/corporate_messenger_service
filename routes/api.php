@@ -60,7 +60,9 @@ Route::delete('/assigment/delete/{id}', 'AssigmentOfActivityController@destroy')
 Route::get('/assigment/all', 'AssigmentOfActivityController@all');
 Route::get('/assigment/userBetweenDate/{idUser}/{startDate}', 'AssigmentOfActivityController@userBetweenDate');
 Route::get('/assigment/for/weekend/{idUser}', 'AssigmentOfActivityController@getCurrentWeekend');
-Route::get('/assigment/update/{idAssigment}/{status}', 'AssigmentOfActivityController@changeStatusAssigment');
+Route::get('/assigment/updatestatus/{idAssigment}/{status}', 'AssigmentOfActivityController@changeStatusAssigment');
+Route::post('/assigment/start/', 'AssigmentOfActivityController@changeStatusStart');
+Route::post('/assigment/stop/', 'AssigmentOfActivityController@changeStatusStop');
 
 
 //MESSAGE

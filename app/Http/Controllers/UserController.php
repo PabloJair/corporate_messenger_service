@@ -50,8 +50,6 @@ class UserController extends Controller
 
         $originalPath = storage_path('app/public/');
         $originalImage= $request->file('image');
-
-
         $nameImage=time().$originalImage->getClientOriginalName();
         $thumbnailImage = Image::make($originalImage);
         $thumbnailImage->resize(700,700);
@@ -68,14 +66,14 @@ class UserController extends Controller
         $data =new User($request->all());
 
 
-        $validate=$data->validate($request->only( 'no_employee',
+        $validate=$data->validate($request->only(
             'name',
             'paternal_surname',
             'maternal_surname',
             'phone_number'));
 
         if($validate->fails()){
-            return response()->json(new ResponseModel(CodeResponse::ERROR,"Campos invalidos",$data,"Error en actualizar tu perfil"), 200);
+            return response()->json(new ResponseModel(CodeResponse::ERROR,"Campos invalidos",null,"Error en actualizar tu perfil"), 200);
         }
         $user=User::find($idUser);
         $user->name = $data->name;

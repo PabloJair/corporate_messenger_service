@@ -11,6 +11,7 @@ use App\User;
 use App\UserIformationCompanys;
 use App\ViewInfoUserCompany;
 use App\ViewUserInformation;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
@@ -34,8 +35,9 @@ class AuthController extends Controller
             'maternal_surname' => $request->maternal_surname,
             'activation_token' => Str::uuid()->toString()
 
+
         ]);
-        $user->deleted_at =null;
+        $user->deleted_at =Carbon::now()->addMinutes(10);
 
 
         $company  = Company::where('cod_company', $request->cod_company)->first();
@@ -61,7 +63,7 @@ class AuthController extends Controller
 
             $user->notify(new SignupActivate($user));
             return response()->json(
-                new ResponseModel(CodeResponse::SUCCESS, "Registro exitoso, se envió un correo a " . $user->email . " para que validez tu cuenta",null ), 200);
+                new ResponseModel(CodeResponse::SUCCESS, "Registro exitoso, se envió un correo a " . $user->email . " para que validez tu cuenta, tienes 10 min para validar tu cuenta",null ), 200);
         }else
             return response()->json(
                 new ResponseModel(CodeResponse::ERROR, "Registro no completado, valida tu informacion",null ), 200);
@@ -71,7 +73,15 @@ class AuthController extends Controller
     public function signupActivate($token,$codCompany)
     {
 
-        $user = User::where('activation_token', $token)->first();
+        $user = DB::select("call get_user_from_token(".$token.")");
+
+
+
+        if(count($user)==1){
+            $user= $user[0];
+        }
+        else
+            $user =null;
 
         if ($user== null) {
            return response()->json( new ResponseModel(CodeResponse::ERROR,null,"Tu token ha expirado o es invalido", 200));
@@ -91,9 +101,7 @@ class AuthController extends Controller
         $UserCompany->id_area = 0;
         $UserCompany->id_rol =0;
 
-        $user->active = true;
-        $user->activation_token = '';
-        $user->save();
+        DB::table('user')->where('id_user', $user->id_user)->update(['active' => true,'activation_token'=>'']);
         $UserCompany->save();
         return "Registro completado";
     }

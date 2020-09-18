@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\AssigmentOfActivity;
 use App\Models\CodeResponse;
 use App\Models\ResponseModel;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -50,6 +51,66 @@ class AssigmentOfActivityController extends Controller
 
 
 
+
+
+    public function changeStatusStart(Request $request)
+    {
+
+
+
+        $idAssigment = $request->get("idAssigment");
+        $time = $mytime = date('Y-m-d H:i:s');
+
+        $assigment = AssigmentOfActivity::find($idAssigment);
+
+
+        $start_date = $assigment->start_date .$assigment->start_time;
+
+
+        if(Carbon::parse($start_date)->lt(Carbon::now()))
+        {
+            return response()->json(
+                new ResponseModel(CodeResponse::SUCCESS, "No, se puede iniciar esta actividad, esta fuera de fechas ", null), 200);
+        }
+        $assigment->status_activity = "2";
+        $assigment->stated_date = $time;
+
+
+        if( $assigment->save()) {
+            return response()->json(
+                new ResponseModel(CodeResponse::SUCCESS, "Actividad actualizada", null), 200);
+        }
+        else {
+            return response()->json(
+                new ResponseModel(CodeResponse::ERROR, "Actividad  no actualizada", null), 200);
+        }
+
+
+    }
+
+    public function changeStatusStop(Request $request)
+    {
+
+        $idAssigment = $request->get("idAssigment");
+        $time = $mytime = date('Y-m-d H:i:s');
+
+        $assigment = AssigmentOfActivity::find($idAssigment);
+        $assigment->status_activity = "6";
+
+        $assigment->finish_date = $time;
+
+
+        if( $assigment->save()) {
+            return response()->json(
+                new ResponseModel(CodeResponse::SUCCESS, "Actividad actualizada", null), 200);
+        }
+        else {
+            return response()->json(
+                new ResponseModel(CodeResponse::ERROR, "Actividad  no actualizada", null), 200);
+        }
+
+
+    }
 
     public function changeStatusAssigment(int $idAssigment,string $status)
     {

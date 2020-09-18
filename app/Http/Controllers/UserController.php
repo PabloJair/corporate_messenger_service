@@ -37,7 +37,7 @@ class UserController extends Controller
     {
 
         $validate =Validator::make($request->all(), [
-            'token' => 'require',
+            'firebaseToken' => 'require',
         ]);
 
 

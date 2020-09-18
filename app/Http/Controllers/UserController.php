@@ -32,6 +32,28 @@ class UserController extends Controller
 
     }
 
+
+    public function updateToken(Request $request,int $idUser)
+    {
+
+        $validate =Validator::make($request->all(), [
+            'token' => 'require',
+        ]);
+
+
+        if(!$validate){
+            return response()->json(new ResponseModel(CodeResponse::ERROR,"Formato no valido",null), 200);
+
+        }
+        $user=User::find($idUser);
+
+
+        $user->device_id =$request->get('token');
+        $user->save();
+        return response()->json(new ResponseModel(CodeResponse::SUCCESS,"", $user,null),200);
+
+    }
+
     public function updatePhoto(Request $request,int $idUser)
     {
 

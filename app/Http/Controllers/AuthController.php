@@ -73,7 +73,7 @@ class AuthController extends Controller
     public function signupActivate($token,$codCompany)
     {
 
-        $user = DB::select("call get_user_from_token(".$token.")");
+        $user = DB::select("call get_user_from_token('".$token."')");
 
 
 

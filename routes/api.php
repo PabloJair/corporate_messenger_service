@@ -50,6 +50,7 @@ Route::post('/user/updatePhoto/{idUser}', 'UserController@updatePhoto');
 Route::patch('/user/updateProfile/{idUser}', 'UserController@updateProfile');
 Route::post('/user/sendPushNotification/{idUser}', 'UserController@sendPushNotification');
 Route::post('/user/recoveryPassword/', 'AuthController@recoveryPassword');
+Route::patch('/user/settoken/{idUser}', 'AuthController@updateToken');
 
 Route::get('/users/forCompany/{idCompany}', 'UserController@GetUsersByIdCompany');
 Route::get('/user/all', 'UserController@getAllUser');

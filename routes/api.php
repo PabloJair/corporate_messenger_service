@@ -51,6 +51,7 @@ Route::patch('/user/updateProfile/{idUser}', 'UserController@updateProfile');
 Route::post('/user/sendPushNotification/{idUser}', 'UserController@sendPushNotification');
 Route::post('/user/recoveryPassword/', 'AuthController@recoveryPassword');
 Route::patch('/user/setfirebasetoken/{idUser}', 'UserController@updateFirebaseToken');
+Route::get('/user/usersInformation/{idCompany}/{pagination}', 'UserController@getUsersInformation');
 
 Route::get('/users/forCompany/{idCompany}', 'UserController@GetUsersByIdCompany');
 Route::get('/user/all', 'UserController@getAllUser');

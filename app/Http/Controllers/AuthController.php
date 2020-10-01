@@ -10,7 +10,7 @@ use App\Notifications\SignupActivate;
 use App\User;
 use App\UserIformationCompanys;
 use App\ViewInfoUserCompany;
-use App\ViewUserInformation;
+use App\ViewUserPermission;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -102,7 +102,7 @@ class AuthController extends Controller
         $UserCompany->id_rol =0;
 
 
-        DB::table('user')->where('id_user', $user->id_user)->update(['active' => true,'activation_token'=>'','deleted_at'=>'']);
+        DB::table('user')->where('id_user', $user->id_user)->update(['active' => true,'activation_token'=>'','deleted_at'=>null]);
         $UserCompany->save();
         return "Registro completado";
     }
@@ -152,7 +152,7 @@ class AuthController extends Controller
             //DB::enableQueryLog(); // Enable query log
             $infoUser=ViewInfoUserCompany::where('email',$request->only('email'))->first();
             //dd(DB::getQueryLog()); // Show results of log
-            $permission = ViewUserInformation::where('email',$request->only('email'))->get();
+            $permission = ViewUserPermission::where('email',$request->only('email'))->get();
 
             return response()->json(
                 new ResponseModel(CodeResponse::SUCCESS,"Login correcto",$this->FormatUser($permission,$jwt_token,$infoUser)), 200);
@@ -187,7 +187,7 @@ class AuthController extends Controller
 
 
 
-        $filterItem = new ViewUserInformation();
+        $filterItem = new ViewUserPermission();
         $filterItem->token =$token;
 
         $filterItem->id_user = $infoUserCompany->id_user;

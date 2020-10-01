@@ -6,8 +6,10 @@ use App\AccountActivated;
 use App\Models\CodeResponse;
 use App\Models\ModelPermission;
 use App\Models\ResponseModel;
+use App\Models\UserPagination;
 use App\User;
 use App\ViewUserInformation;
+use App\ViewUserPermission;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -27,7 +29,7 @@ class UserController extends Controller
     public function UserByIdCompany(Int $idUSer,Int $idCompany)
     {
 
-        $items = ViewUserInformation::where('id_company',$idCompany)->where('id_user',$idUSer)->get();
+        $items = ViewUserPermission::where('id_company',$idCompany)->where('id_user',$idUSer)->get();
         return response()->json(new ResponseModel(CodeResponse::ERROR,"",$this->FormatUser($items)), 200);
 
     }
@@ -113,7 +115,7 @@ class UserController extends Controller
     {
 
 
-        $items = ViewUserInformation::select(
+        $items = ViewUserPermission::select(
             'id_user',
             'id_company',
             'email',
@@ -153,12 +155,31 @@ class UserController extends Controller
 
     }
 
+    public function getUsersInformation(Int $idCompany,Int $pagination)
+    {
+
+        $pagination = $pagination ==0 ? 1 :$pagination;
+        $id_company= $idCompany ==0 ? 0 :$idCompany;
+
+
+
+
+        $items=ViewUserInformation::where('id_company',$id_company)->paginate($pagination);
+
+        $items->each(function ($item){
+
+            $item->photo_path =  asset(($item->photo_path == null ||$item->photo_path=='')?"storage/default_user.png":"storage/".$item->photo_path);
+        });
+
+        return response()->json(new ResponseModel(CodeResponse::SUCCESS,"",$items, 200));
+
+    }
 
 
     public function getAllUser()
     {
 
-        $items = ViewUserInformation::select(
+        $items = ViewUserPermission::select(
             'id_user',
             'name',
             'paternal_surname',
@@ -177,7 +198,7 @@ class UserController extends Controller
             return array();
         }
 
-        $filterItem = new ViewUserInformation();
+        $filterItem = new ViewUserPermission();
 
         $filterItem->id_user = $items->get(0)->id_user;
         $filterItem->no_employee = $items->get(0)->no_employee;
@@ -247,7 +268,7 @@ class UserController extends Controller
 
         $filterItems = array();
         foreach ($items as $item) {
-            $filterItem = new ViewUserInformation();
+            $filterItem = new ViewUserPermission();
 
             $filterItem->id_user = $item->id_user;
             $filterItem->no_employee = $item->no_employee;

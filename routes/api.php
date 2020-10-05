@@ -35,7 +35,7 @@ Route::get('/module/all', 'ModuleController@show');
 Route::post('/rol/add', 'RolController@store');
 Route::patch('/rol/update/{id}', 'RolController@update');
 Route::delete('/rol/delete/{id}', 'RolController@destroy');
-Route::get('/rol/all', 'RolController@show');
+Route::get('/rol/all', 'RolController@all');
 // UserSTatus
 
 Route::post('/userStatus/add', 'UserStatusController@store');
@@ -44,18 +44,30 @@ Route::delete('/serStatus/{id}', 'UserStatusController@destroy');
 Route::get('/userStatus/all', 'UserStatusController@show');
 
 //User
-
+Route::get('/user/modules/{idUser}', 'UserController@getModuleForUser');
+Route::get('/user/usersInformation/{idCompany}/{pagination}', 'UserController@getUsersInformation');
+Route::get('/user/notAssigmentModules/{idUser}', 'UserController@getNotAssigmentModuleForUser');
+Route::get('/users/forCompany/{idCompany}', 'UserController@GetUsersByIdCompany');
+Route::get('/user/all', 'UserController@getAllUser');
 Route::get('/user/{idUser}/{idCompany}', 'UserController@UserByIdCompany');
 Route::post('/user/updatePhoto/{idUser}', 'UserController@updatePhoto');
 Route::patch('/user/updateProfile/{idUser}', 'UserController@updateProfile');
 Route::post('/user/sendPushNotification/{idUser}', 'UserController@sendPushNotification');
 Route::post('/user/recoveryPassword/', 'AuthController@recoveryPassword');
 Route::patch('/user/setfirebasetoken/{idUser}', 'UserController@updateFirebaseToken');
-Route::get('/user/usersInformation/{idCompany}/{pagination}', 'UserController@getUsersInformation');
 
-Route::get('/users/forCompany/{idCompany}', 'UserController@GetUsersByIdCompany');
-Route::get('/user/all', 'UserController@getAllUser');
 
+Route::patch('/user/modules/updatePermission/{idUser}', 'UserController@updatePermission');
+Route::post('/user/modules/addToUser', 'UserController@addModuleToUser');
+Route::delete('/user/modules/delete/{id_info_user_company}', 'UserController@deleteModuleToUser');
+
+Route::patch('/user/changeArea/{idUser}/{idArea}', 'UserController@changeAreaUser');
+Route::patch('/user/changeRol/{idUser}/{idRol}', 'UserController@changeRolUser');
+
+
+Route::patch('/user/changeStatus/{idUser}/{status}', 'UserController@changeStatusUser');
+
+//Asigmacion de actividades
 Route::post('/assigment/add', 'AssigmentOfActivityController@store');
 Route::patch('/assigment/update/{id}', 'AssigmentOfActivityController@update');
 Route::delete('/assigment/delete/{id}', 'AssigmentOfActivityController@destroy');
@@ -63,8 +75,12 @@ Route::get('/assigment/all', 'AssigmentOfActivityController@all');
 Route::get('/assigment/userBetweenDate/{idUser}/{startDate}', 'AssigmentOfActivityController@userBetweenDate');
 Route::get('/assigment/for/weekend/{idUser}', 'AssigmentOfActivityController@getCurrentWeekend');
 Route::get('/assigment/updatestatus/{idAssigment}/{status}', 'AssigmentOfActivityController@changeStatusAssigment');
+Route::get('/assigment/for/moth/{idUser}', 'AssigmentOfActivityController@getActivitiesforMoth');
+
 Route::post('/assigment/start/', 'AssigmentOfActivityController@changeStatusStart');
 Route::post('/assigment/stop/', 'AssigmentOfActivityController@changeStatusStop');
+
+
 
 
 //MESSAGE

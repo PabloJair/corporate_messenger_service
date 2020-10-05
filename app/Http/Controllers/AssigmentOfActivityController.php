@@ -49,6 +49,28 @@ class AssigmentOfActivityController extends Controller
 
     }
 
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getActivitiesforMoth(int $idUSer)
+    {
+
+
+        $datas= AssigmentOfActivity::
+        whereRaw('month(start_date) = month(current_date) and year(start_date) = year(current_date) and id_user =?',[$idUSer])
+            ->get();
+
+
+        return response()->json(
+            new ResponseModel(CodeResponse::SUCCESS,"Success",$datas), 200);
+
+
+    }
+
+
 
 
 
@@ -145,16 +167,19 @@ class AssigmentOfActivityController extends Controller
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function store(Request $request)
     {
         $assigmentOfActivity= new AssigmentOfActivity($request->only(
-            ['id_user','type_activity','status_activity','start_date','end_date','start_time','end_time','notes','stated_date','finish_date']
+            ['id_user','type_activity','status_activity','start_date','end_date','start_time','end_time','notes']
         ));
 
 
         $assigmentOfActivity->save();
+
+        return response()->json(
+            new ResponseModel(CodeResponse::SUCCESS,"Se agrego correctamente",$assigmentOfActivity), 200);
 
 
     }

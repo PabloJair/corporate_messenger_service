@@ -20,7 +20,7 @@ class AreaController extends Controller
     public function all()
     {
         return response()->json(
-            new ResponseModel(CodeResponse::SUCCESS,"Success Save",Area::all()), 200);
+            new ResponseModel(CodeResponse::SUCCESS,"Area",Area::all()), 200);
     }
 
     /**

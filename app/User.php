@@ -83,10 +83,10 @@ class   User extends Authenticatable implements JWTSubject,IValidator
     public function validateUpdated(array $data)
     {
         return Validator::make($data, [
-            'name'     => ['required',
-                'max:150',
-                'unique:' . $this->table . ',name_company'],
-            'description_company'    =>'required|max:255',
+            'name'     => 'required',
+            'paternal_surname'    =>'required|max:255',
+            'maternal_surname'    =>'required|max:255',
+            'phone_number'    =>'required|max:255'
         ]);
 
     }

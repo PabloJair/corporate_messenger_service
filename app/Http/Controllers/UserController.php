@@ -7,7 +7,9 @@ use App\Models\CodeResponse;
 use App\Models\ModelPermission;
 use App\Models\ResponseModel;
 use App\Models\UserPagination;
+use App\PermissionUserApp;
 use App\User;
+use App\UserIformationCompanys;
 use App\ViewUserInformation;
 use App\ViewUserPermission;
 use Illuminate\Http\Request;
@@ -33,8 +35,55 @@ class UserController extends Controller
         return response()->json(new ResponseModel(CodeResponse::ERROR,"",$this->FormatUser($items)), 200);
 
     }
+    public function changeAreaUser(Int $idUSer,Int $idArea)
+    {
 
 
+        $items = UserIformationCompanys::find($idUSer);
+        if(!$items){
+            return response()->json(new ResponseModel(CodeResponse::SUCCESS,"El usuario no existe",$idUSer, null),200);
+        }
+
+        $items->id_area =$idArea;
+        $items->save();
+
+        return response()->json(new ResponseModel(CodeResponse::SUCCESS,"Area cambiada correctamente",$idUSer,null), 200);
+
+    }
+    public function changeRolUser(Int $idUSer,Int $idRol)
+    {
+
+
+        $items = UserIformationCompanys::find($idUSer);
+
+        if(!$items){
+            return response()->json(new ResponseModel(CodeResponse::SUCCESS,"El usuario no existe",$idUSer, null),200);
+
+        }
+
+        $items->id_rol =$idRol;
+        $items->save();
+
+        return response()->json(new ResponseModel(CodeResponse::SUCCESS,"Rol cambiada correctamente",$idUSer,null), 200);
+
+    }
+    public function changeStatusUser(Int $idUSer,string $status)
+    {
+
+
+        $items = User::find($idUSer);
+
+        if(!$items){
+            return response()->json(new ResponseModel(CodeResponse::SUCCESS,"El usuario no existe",$idUSer, null),200);
+
+        }
+
+        $items->status_user =$status;
+        $items->save();
+
+        return response()->json(new ResponseModel(CodeResponse::SUCCESS,"Estatus  Actualizado",$idUSer,null), 200);
+
+    }
     public function updateFirebaseToken(Request $request,int $idUser)
     {
 
@@ -55,7 +104,6 @@ class UserController extends Controller
         return response()->json(new ResponseModel(CodeResponse::SUCCESS,"Token actualizado", null,null),200);
 
     }
-
     public function updatePhoto(Request $request,int $idUser)
     {
 
@@ -83,14 +131,13 @@ class UserController extends Controller
         return response()->json(new ResponseModel(CodeResponse::SUCCESS,"", $user,null),200);
 
     }
-
-
     public function updateProfile(Request $request,int $idUser)
     {
         $data =new User($request->all());
 
 
-        $validate=$data->validate($request->only(
+
+        $validate=$data->validateUpdated($request->only(
             'name',
             'paternal_surname',
             'maternal_surname',
@@ -99,6 +146,8 @@ class UserController extends Controller
         if($validate->fails()){
             return response()->json(new ResponseModel(CodeResponse::ERROR,"Campos invalidos",null,"Error en actualizar tu perfil"), 200);
         }
+
+
         $user=User::find($idUser);
         $user->name = $data->name;
         $user->paternal_surname = $data->paternal_surname;
@@ -109,8 +158,6 @@ class UserController extends Controller
         return response()->json(new ResponseModel(CodeResponse::SUCCESS,"Actualización correcta", $user,null),200);
 
     }
-
-
     public function GetUsersByIdCompany(Int $idCompany)
     {
 
@@ -154,7 +201,6 @@ class UserController extends Controller
         return response()->json(new ResponseModel(CodeResponse::SUCCESS,"",$this->FormatUsers($items)), 200);
 
     }
-
     public function getUsersInformation(Int $idCompany,Int $pagination)
     {
 
@@ -174,8 +220,6 @@ class UserController extends Controller
         return response()->json(new ResponseModel(CodeResponse::SUCCESS,"",$items, 200));
 
     }
-
-
     public function getAllUser()
     {
 
@@ -257,8 +301,66 @@ class UserController extends Controller
 
 
     }
+    public function getModuleForUser(Int $idUser)
+    {
+
+        $items = ViewUserPermission::select('can_create','can_delete','can_update','can_select','id_permission_user_application','id_module','name_module','icon_module')->where('id_user',$idUser)->get();
+
+        return response()->json(new ResponseModel(CodeResponse::SUCCESS,"getModuleForUser",$items,null), 200);
+    }
+    public function updatePermission(Request $request , Int $idUserPermission)
+    {
+
+        $items = PermissionUserApp::find($idUserPermission);
 
 
+
+        if($request->get("can_delete")!==null){
+            $items->can_delete=$request->input("can_delete");
+
+        }else if($request->get("can_select")!==null){
+            $items->can_select=$request->input("can_select");
+
+        }else if($request->get("can_update")!==null){
+            $items->can_update=$request->input("can_update");
+
+        }else if($request->get("can_create")!==null){
+            $items->can_create=$request->input("can_create");
+
+        }
+
+        $items->save();
+
+        return response()->json(new ResponseModel(CodeResponse::SUCCESS,"updatePermission",$idUserPermission,null), 200);
+    }
+    public function getNotAssigmentModuleForUser(Int $idUser)
+    {
+
+        $items =  DB::select("call getIsNotContentModuleUser(".$idUser.")");
+
+        return response()->json(new ResponseModel(CodeResponse::SUCCESS,"getNotAssigmentModuleForUser",$items,null), 200);
+    }
+
+    public function deleteModuleToUser(Int $id_info_user_company){
+        PermissionUserApp::destroy($id_info_user_company);
+
+        return response()->json(new ResponseModel(CodeResponse::SUCCESS,"Se  elimino correctamente",$id_info_user_company,null), 200);
+
+    }
+    public function addModuleToUser(Request $request){
+        $items =new  PermissionUserApp();
+        $items->id_info_user_company = $request->input("id_info_user_company");
+        $items->id_company_module = $request->input("id_company_module");
+        $items->can_create = true;
+        $items->can_update = true;
+        $items->can_select = true;
+        $items->can_delete = true;
+        $items->save();
+
+
+        return response()->json(new ResponseModel(CodeResponse::SUCCESS,"Se agrego correctamente",$items,null), 200);
+
+    }
     private function FormatUsers(object $items){
 
 

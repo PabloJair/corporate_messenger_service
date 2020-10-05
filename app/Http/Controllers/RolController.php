@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Area;
 use App\Models\CodeResponse;
 use App\Models\ResponseModel;
 use App\Rol;
@@ -13,11 +14,12 @@ class RolController extends Controller
     /**
      * Show the form for creating a new resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function all()
     {
-        //
+        return response()->json(new ResponseModel(CodeResponse::SUCCESS,"Roles",Rol::all()), 200);
+
     }
 
     /**

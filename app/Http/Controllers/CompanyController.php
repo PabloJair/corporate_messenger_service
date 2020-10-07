@@ -35,6 +35,7 @@ class CompanyController extends Controller
         $data =new Company($request->all());
 
 
+
         $validate=$data->validate($request->only(['name_company','description_company']));
 
         if($validate->fails()){

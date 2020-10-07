@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\AssigmentOfActivity;
 use App\Models\CodeResponse;
 use App\Models\ResponseModel;
+use App\NewNotification;
+use App\Notifications\NewActivityEmail;
+use App\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -21,6 +24,9 @@ class AssigmentOfActivityController extends Controller
     {
         return response()->json(
             new ResponseModel(CodeResponse::SUCCESS,AssigmentOfActivity::all(),"Success Save"), 200);
+
+
+
     }
 
 
@@ -151,6 +157,19 @@ class AssigmentOfActivityController extends Controller
 
 
     }
+
+
+    public function sendPushNotificationActivity(AssigmentOfActivity $info){
+        try {
+            $user=User::find($info->id_user);
+            $user->notify(new NewNotification($info));
+            $user->notify(new NewActivityEmail($info));
+
+        }catch (Exception $exception){
+            dd($exception);
+        }
+
+    }
     public function getCurrentWeekend(int $idUSer)
     {
 
@@ -171,15 +190,26 @@ class AssigmentOfActivityController extends Controller
      */
     public function store(Request $request)
     {
+
+
         $assigmentOfActivity= new AssigmentOfActivity($request->only(
             ['id_user','type_activity','status_activity','start_date','end_date','start_time','end_time','notes']
         ));
 
 
-        $assigmentOfActivity->save();
 
-        return response()->json(
-            new ResponseModel(CodeResponse::SUCCESS,"Se agrego correctamente",$assigmentOfActivity), 200);
+        if($assigmentOfActivity->save()){
+            $this->sendPushNotificationActivity($assigmentOfActivity);
+
+            return response()->json(
+                new ResponseModel(CodeResponse::SUCCESS,"Se agrego correctamente",$assigmentOfActivity), 200);
+        }else {
+            return response()->json(
+                new ResponseModel(CodeResponse::ERROR,"Erro al agregar la actividad al usuario",$assigmentOfActivity), 200);
+        }
+
+
+
 
 
     }
@@ -195,37 +225,83 @@ class AssigmentOfActivityController extends Controller
         //
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\AssigmentOfActivity  $assigmentOfActivity
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(AssigmentOfActivity $assigmentOfActivity)
+
+    public function edit(Request $request, int $id)
     {
-        //
+        $item= AssigmentOfActivity::find($id);
+
+        if($item == null){
+
+            return response()->json(
+                new ResponseModel(CodeResponse::ERROR,"Dato no encontrado",$id), 200);
+        }
+        $item->start_date = $request->get("start_date")?? $item->start_date;
+        $item->end_date = $request->get("end_date")?? $item->end_date;
+        $item->start_time = $request->get("start_time")?? $item->start_time;
+        $item->end_time = $request->get("end_time")?? $item->end_time;
+        $item->end_time = $request->get("end_time")?? $item->end_time;
+        $item->notes = $request->get("notes")?? $item->notes;
+        $item->type_activity = $request->get("type_activity")?? $item->type_activity;
+
+        if($item->save()){
+            return response()->json(
+                new ResponseModel(CodeResponse::SUCCESS,"Actialización correcta",$id), 200);
+
+        }
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\AssigmentOfActivity  $assigmentOfActivity
-     * @return \Illuminate\Http\Response
+     * @param \Illuminate\Http\Request $request
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function update(Request $request, AssigmentOfActivity $assigmentOfActivity)
+    public function update(Request $request, int $id)
     {
-        //
+
+       $item= AssigmentOfActivity::find($id);
+
+       if($item == null){
+
+           return response()->json(
+               new ResponseModel(CodeResponse::ERROR,"Dato no encontrado",$id), 200);
+       }
+        $item->start_date = $request->get("start_date")?? $item->start_date;
+        $item->end_date = $request->get("end_date")?? $item->end_date;
+        $item->start_time = $request->get("start_time")?? $item->start_time;
+        $item->end_time = $request->get("end_time")?? $item->end_time;
+
+        if($item->save()){
+            return response()->json(
+                new ResponseModel(CodeResponse::SUCCESS,"Actialización correcta",$id), 200);
+
+        }
+
     }
+
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\AssigmentOfActivity  $assigmentOfActivity
-     * @return \Illuminate\Http\Response
+     * @param Int $id
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function destroy(AssigmentOfActivity $assigmentOfActivity)
+    public function destroy(Int $id)
     {
-        //
+        $items =AssigmentOfActivity::find($id);
+
+
+       if( $items->delete()){
+           return response()->json(
+               new ResponseModel(CodeResponse::SUCCESS,"Eliminado correctamente",$id), 200);
+       }else
+       {
+           return response()->json(
+               new ResponseModel(CodeResponse::SUCCESS,"No se pudo eliminar la actividad",$id), 200);
+       }
     }
+
+
+
 }

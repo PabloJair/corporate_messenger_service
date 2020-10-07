@@ -2,6 +2,7 @@
 
 
 namespace App;
+use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use NotificationChannels\Fcm\FcmChannel;
 use NotificationChannels\Fcm\FcmMessage;
@@ -13,9 +14,8 @@ use NotificationChannels\Fcm\Resources\ApnsFcmOptions;
 use NotificationChannels\Fcm\Resources\FcmOptions;
 
 
-class AccountActivated extends Notification
+class NewNotification extends Notification
 {
-
 
     public function via($notifiable)
     {
@@ -23,19 +23,24 @@ class AccountActivated extends Notification
 
     }
 
+    function __construct(AssigmentOfActivity $assigmentActivity){
+        $this->assigmentActivity =$assigmentActivity;
+    }
 
-
+        private  $assigmentActivity;
     public function toFcm($notifiable)
     {
+
 
 
         $fcm= FcmMessage::create()
 
             ->setData(['data1' => 'value', 'data2' => 'value2'])
+            ->setToken($notifiable->device_id)
             ->setNotification(\NotificationChannels\Fcm\Resources\Notification::create()
-                ->setTitle('Account Activated')
-                ->setBody('Your account has been activated.')
-                ->setImage('http://example.com/url-to-image-here.png'))
+                ->setTitle('Actividad nueva Asignada')
+                ->setBody('Inicia el dia : '.$this->assigmentActivity->start_date." y termina: ".$this->assigmentActivity->end_date)
+                ->setImage('https://blogsterapp.com/wp-content/uploads/2018/03/como-elaborar-un-calendario-editorial.jpg'))
 
             ->setAndroid(
                 AndroidConfig::create()
@@ -48,7 +53,6 @@ class AccountActivated extends Notification
 
         return $fcm;
     }
-
 
 
 }

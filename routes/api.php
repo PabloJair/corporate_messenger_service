@@ -70,6 +70,8 @@ Route::patch('/user/changeStatus/{idUser}/{status}', 'UserController@changeStatu
 //Asigmacion de actividades
 Route::post('/assigment/add', 'AssigmentOfActivityController@store');
 Route::patch('/assigment/update/{id}', 'AssigmentOfActivityController@update');
+Route::patch('/assigment/edit/{id}', 'AssigmentOfActivityController@edit');
+
 Route::delete('/assigment/delete/{id}', 'AssigmentOfActivityController@destroy');
 Route::get('/assigment/all', 'AssigmentOfActivityController@all');
 Route::get('/assigment/userBetweenDate/{idUser}/{startDate}', 'AssigmentOfActivityController@userBetweenDate');
@@ -79,6 +81,9 @@ Route::get('/assigment/for/moth/{idUser}', 'AssigmentOfActivityController@getAct
 
 Route::post('/assigment/start/', 'AssigmentOfActivityController@changeStatusStart');
 Route::post('/assigment/stop/', 'AssigmentOfActivityController@changeStatusStop');
+Route::patch('/assigment/updatetime/{id}', 'AssigmentOfActivityController@update');
+Route::delete('/assigment/delete/{id}', 'AssigmentOfActivityController@destroy');
+Route::post('/assigment/notification', 'AssigmentOfActivityController@sendPushNotificationActivity');
 
 
 

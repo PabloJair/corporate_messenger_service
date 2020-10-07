@@ -250,7 +250,7 @@ class UserController extends Controller
         $filterItem->paternal_surname = $items->get(0)->paternal_surname;
         $filterItem->maternal_surname = $items->get(0)->maternal_surname;
         $filterItem->email = $items->get(0)->email;
-        $filterItem->photo_path =  assert($items->get(0)->photo_path);
+        $filterItem->photo_path =       asset(($items->get(0)->photo_path == null ||$items->get(0)->photo_path=='')?"storage/default_user.png":"storage/".$items->get(0)->photo_path);
 
         $filterItem->name_area = $items->get(0)->name_area;
         $filterItem->icon_area = $items->get(0)->icon_area;
@@ -297,8 +297,6 @@ class UserController extends Controller
         }catch (CouldNotSendNotification $exception){
             dd($exception);
         }
-
-
 
     }
     public function getModuleForUser(Int $idUser)
@@ -378,7 +376,7 @@ class UserController extends Controller
             $filterItem->paternal_surname = $item->paternal_surname;
             $filterItem->maternal_surname = $item->maternal_surname;
             $filterItem->email = $item->email;
-            $filterItem->photo_path = $item->photo_path;
+            $filterItem->photo_path =  asset(($item->photo_path == null ||$item->photo_path=='')?"storage/default_user.png":"storage/".$item->photo_path);
 
             $filterItem->name_area = $item->name_area;
             $filterItem->icon_area = $item->icon_area;

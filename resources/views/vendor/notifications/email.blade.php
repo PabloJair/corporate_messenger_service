@@ -43,8 +43,7 @@
 @if (! empty($salutation))
 {{ $salutation }}
 @else
-@lang('S10PLUS'),<br>
-{{ config('app.name') }}
+@lang('S10PLUS')<br>
 @endif
 
 {{-- Subcopy --}}

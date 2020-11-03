@@ -89,7 +89,10 @@ Route::post('/assigment/notification', 'AssigmentOfActivityController@sendPushNo
 
 
 //MESSAGE
+Route::get('/message/userFrom/{id_user_from}/userTo/{id_user_to}/pagination/{pagination}', 'MessageController@getMessagePaginateUser');
+
 Route::get('/message/by/{idUser}', 'MessageController@getAllMessageByUser');
+
 Route::post('/message/send', 'MessageController@sendMessage');
 Route::get('/message/room/{idRoom}/{idUser}/{date}', 'MessageController@getMessageFromRoom');
 Route::get('/message/fromLastMessage/{idRoom}/{idUser}/{date}/{lastMessage}', 'MessageController@getLastMessageFrom');

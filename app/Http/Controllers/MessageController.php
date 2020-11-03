@@ -7,6 +7,8 @@ use App\Models\CodeResponse;
 use App\Models\ResponseModel;
 use App\Models\RoomChat;
 use App\Models\SendMessageModel;
+use App\ViewMessageUserFromUserTo;
+use App\ViewUserInformation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -36,6 +38,44 @@ class MessageController extends Controller
         $items = DB::select('call get_chat_room_user_2_user(?)',array($idUser));
         //$this->formatMessage($items)
         return response()->json(new ResponseModel(CodeResponse::SUCCESS,"",$this->filterChatRoom($items)), 200);
+
+        //
+    }
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @param int $idUser
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getMessagePaginateUser(Int $id_user_from,Int $id_user_to,Int $pagination)
+    {
+
+
+        $items = ViewMessageUserFromUserTo::where([
+
+            ['id_user_from', '=', $id_user_from],
+            ['id_user_to', '=', $id_user_to],
+
+        ])->orWhere(
+            [
+
+                ['id_user_from', '=', $id_user_to],
+                ['id_user_to', '=', $id_user_from],
+
+            ]
+        )->paginate($pagination);
+
+
+
+        $items->each(function ($item){
+
+            $item->photo_user_to =  asset(($item->photo_user_to === null ||$item->photo_user_to=='')?"storage/default_user.png":"storage/".$item->photo_user_to);
+            $item->photo_user_from =  asset(($item->photo_user_from === null ||$item->photo_user_from=='')?"storage/default_user.png":"storage/".$item->photo_user_from);
+
+        });
+        //$this->formatMessage($items)
+        return response()->json(new ResponseModel(CodeResponse::SUCCESS,"",$items), 200);
 
         //
     }
